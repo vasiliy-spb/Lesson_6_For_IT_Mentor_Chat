@@ -4,6 +4,7 @@ import dev.cheercode.units.Unit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Room {
     public static final int MAX_ROOMS = 3;
@@ -62,10 +63,15 @@ public class Room {
 
     @Override
     public String toString() {
-        List<String> linkedRoomNumbers = linkedRooms.stream()
+//        List<String> linkedRoomNumbers = linkedRooms.stream()
+//                .map(Room::getNumber)
+//                .map(String::valueOf)
+//                .toList();
+
+        String linkedRoomNumbers = linkedRooms.stream()
                 .map(Room::getNumber)
                 .map(String::valueOf)
-                .toList();
+                .collect(Collectors.joining(", "));
 
         return "Room{" +
                 "number=" + number +

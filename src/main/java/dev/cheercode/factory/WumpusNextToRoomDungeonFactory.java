@@ -1,16 +1,14 @@
 package dev.cheercode.factory;
 
 import dev.cheercode.Dungeon;
-import dev.cheercode.units.Bat;
 import dev.cheercode.units.Hunter;
-import dev.cheercode.units.Pit;
 import dev.cheercode.units.Wumpus;
 
-public class EightRoomDungeonFactory implements DungeonFactory {
+public class WumpusNextToRoomDungeonFactory implements DungeonFactory {
     private final Wumpus wumpus;
     private final Hunter hunter;
 
-    public EightRoomDungeonFactory(Wumpus wumpus, Hunter hunter) {
+    public WumpusNextToRoomDungeonFactory(Wumpus wumpus, Hunter hunter) {
         this.wumpus = wumpus;
         this.hunter = hunter;
     }
@@ -29,9 +27,7 @@ public class EightRoomDungeonFactory implements DungeonFactory {
                 .build();
 
         dungeon.addUnit(hunter, 1);
-        dungeon.addUnit(wumpus, 4);
-        dungeon.addUnit(new Bat(), 2);
-        dungeon.addUnit(new Pit(), 3);
+        dungeon.addUnit(wumpus, 5);
 
         return dungeon;
     }
