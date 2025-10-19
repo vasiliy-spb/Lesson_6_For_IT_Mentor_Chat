@@ -37,56 +37,89 @@ public class Game {
             int roomNumber = moveDialog.input();
 
             if (isMoveAction(action)) {
-                hunter.move(dungeon, roomNumber);
-
-                if (isBatRoom(roomNumber)) {
-                    System.out.println("ЛЕТУЧИЕ МЫШИ ПЕРЕНЕСЛИ ВАС КУДА-ТО!");
-                    Bat bat = getBat(roomNumber);
-                    bat.transportHunter(dungeon, hunter);
-
-                    roomNumber = dungeon.getRoomNumber(hunter);
-                }
-
-                if (isPitRoom(roomNumber)) {
-                    System.out.println("ВЫ ПРОВАЛИЛИСЬ В ЯМУ-У-У-У-у-у-у");
-                    hunter.kill();
-                    continue;
-                }
+                move(roomNumber);
+            } else if (isShotAction(action)) {
+                shot(roomNumber, hunterRoomNumber);
             }
 
-            if (isShotAction(action)) {
-                hunter.shot(dungeon, roomNumber);
-                if (!hunter.hasArrows()) {
-                    System.out.println("ЗАКОНЧИЛИСЬ СТРЕЛЫ.. ВАШИ МИНУТЫ СОЧТЕНЫ..");
-                }
-
-                if (!wumpus.isAlive()) {
-                    System.out.println("ВЫ ПОДСТРЕЛИЛИ ВУМПУСА!");
-                    System.out.println("РАДУЙТЕСЬ ПОКА МОЖЕТЕ.. ВУМПУС ПОЙМАЕТ ВАС В СЛЕДУЮЩИЙ РАЗ!");
-                    continue;
-                }
-
-                if (isWumpusNearby(hunterRoomNumber)){
-                    System.out.println("ТРЕПЕЩИТЕ!! ВЫ РАЗБУДИЛИ ВУМПУСА...");
-                    wumpus.move(dungeon);
-                }
-            }
-
-            if (isWumpusRoom(roomNumber)) {
-                System.out.println("ВАС РАСТЕРЗАЛ ВУМПУС!");
-                hunter.kill();
+            if (isWumpusBumped()) {
+                killHunter();
                 continue;
             }
 
             System.out.println();
         }
 
+        showResult();
+    }
+
+    private void move(int roomNumber) {
+        hunter.move(dungeon, roomNumber);
+
+        if (isBatBumped()) {
+            showMessageBatBumped();
+
+            Bat bat = getBat(roomNumber);
+            bat.transportHunter(dungeon, hunter);
+        }
+
+        if (isFellInPit()) {
+            showFellInPitMessage();
+            hunter.kill();
+        }
+    }
+
+    private static void showFellInPitMessage() {
+        System.out.println("ВЫ ПРОВАЛИЛИСЬ В ЯМУ-У-У-У-у-у-у");
+    }
+
+    private static void showMessageBatBumped() {
+        System.out.println("ЛЕТУЧИЕ МЫШИ ПЕРЕНЕСЛИ ВАС КУДА-ТО!");
+    }
+
+    private void shot(int roomNumber, int hunterRoomNumber) {
+        hunter.shot(dungeon, roomNumber);
+
+        if (!hunter.hasArrows()) {
+            showMessageOutOfArrows();
+        }
+
+        if (!wumpus.isAlive()) {
+            showWumpusKillMessage();
+            return;
+        }
+
+        if (isWumpusNearby(hunterRoomNumber)) {
+            showWumpusWakeUpMessage();
+            wumpus.move(dungeon);
+        }
+    }
+
+    private static void showWumpusWakeUpMessage() {
+        System.out.println("ТРЕПЕЩИТЕ!! ВЫ РАЗБУДИЛИ ВУМПУСА...");
+    }
+
+    private void showResult() {
         if (isWon()) {
             System.out.println("ВЫ ПОБЕДИЛИ!");
         }
         if (isLose()) {
             System.out.println("ВЫ ПРОИГРАЛИ..");
         }
+    }
+
+    private void killHunter() {
+        System.out.println("ВАС РАСТЕРЗАЛ ВУМПУС!");
+        hunter.kill();
+    }
+
+    private void showWumpusKillMessage() {
+        System.out.println("ВЫ ПОДСТРЕЛИЛИ ВУМПУСА!");
+        System.out.println("РАДУЙТЕСЬ ПОКА МОЖЕТЕ.. ВУМПУС ПОЙМАЕТ ВАС В СЛЕДУЮЩИЙ РАЗ!");
+    }
+
+    private void showMessageOutOfArrows() {
+        System.out.println("ЗАКОНЧИЛИСЬ СТРЕЛЫ.. ВАШИ МИНУТЫ СОЧТЕНЫ..");
     }
 
     private void showPositionMessage(int hunterRoomNumber, List<Integer> hunterLinkedRoomNumbers) {
@@ -121,15 +154,19 @@ public class Game {
         return DungeonUtils.getUnit(dungeon, roomNumber, Bat.class);
     }
 
-    private boolean isBatRoom(int roomNumber) {
-        return DungeonUtils.isUnitRoom(dungeon, roomNumber, Bat.class);
+    private boolean isBatBumped() {
+        int hunterRoomNumber = dungeon.getRoomNumber(hunter);
+        return DungeonUtils.isUnitRoom(dungeon, hunterRoomNumber, Bat.class);
     }
 
-    private boolean isWumpusRoom(int roomNumber) {
-        return DungeonUtils.isUnitRoom(dungeon, roomNumber, Wumpus.class);
+    private boolean isWumpusBumped() {
+        int hunterRoomNumber = dungeon.getRoomNumber(hunter);
+        int wumpusRoomNumber = dungeon.getRoomNumber(wumpus);
+        return hunterRoomNumber == wumpusRoomNumber;
     }
 
-    private boolean isPitRoom(int roomNumber) {
+    private boolean isFellInPit() {
+        int roomNumber = dungeon.getRoomNumber(hunter);
         return DungeonUtils.isUnitRoom(dungeon, roomNumber, Pit.class);
     }
 

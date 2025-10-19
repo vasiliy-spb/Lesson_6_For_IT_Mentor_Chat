@@ -10,6 +10,10 @@ public class Wumpus extends AliveUnit {
     private final Random random = new Random();
 
     public void move(Dungeon dungeon) {
+        if (!isAlive()) {
+            throw new IllegalArgumentException("Wumpus is not alive: " + this);
+        }
+
         int nextRoom = getNextRoomNumber(dungeon);
 
         dungeon.removeUnit(this);

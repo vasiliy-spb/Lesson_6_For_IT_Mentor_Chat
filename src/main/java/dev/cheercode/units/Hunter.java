@@ -19,6 +19,10 @@ public class Hunter extends AliveUnit {
     }
 
     public void move(Dungeon dungeon, int roomNumber) {
+        if (!isAlive()) {
+            throw new IllegalArgumentException("Hunter is not alive: " + this);
+        }
+
         dungeon.removeUnit(this);
         dungeon.addUnit(this, roomNumber);
     }
