@@ -8,12 +8,11 @@ public class DungeonUtils {
     private DungeonUtils() {
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends Unit> T getUnit(Dungeon dungeon, int roomNumber, Class<T> unitClazz) {
         List<Unit> units = dungeon.getUnits(roomNumber);
         for (Unit unit : units) {
             if (unitClazz.isInstance(unit)) {
-                return (T) unit;
+                return unitClazz.cast(unit);
             }
         }
 

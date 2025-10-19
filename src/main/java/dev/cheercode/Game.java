@@ -1,5 +1,7 @@
 package dev.cheercode;
 
+import dev.cheercode.command.Command;
+import dev.cheercode.command.CommandFactory;
 import dev.cheercode.dialog.Dialog;
 import dev.cheercode.dialog.IntegerDialog;
 import dev.cheercode.dialog.StringDialog;
@@ -13,11 +15,13 @@ public class Game {
     private Dungeon dungeon;
     private Wumpus wumpus;
     private Hunter hunter;
+    private CommandFactory factory;
 
     public Game(Dungeon dungeon, Wumpus wumpus, Hunter hunter) {
         this.dungeon = dungeon;
         this.wumpus = wumpus;
         this.hunter = hunter;
+        this.factory = new CommandFactory(this, MOVE_KEY, SHOT_KEY);
     }
 
     public void start() {
@@ -32,14 +36,17 @@ public class Game {
 
             showPositionMessage(hunterRoomNumber, hunterLinkedRoomNumbers);
 
-            String action = selectActionDialog.input();
+            String commandKey = selectActionDialog.input();
             Dialog<Integer> moveDialog = new IntegerDialog("Куда?", "Неправильный ввод", hunterLinkedRoomNumbers);
             int roomNumber = moveDialog.input();
 
-            if (isMoveAction(action)) {
+//            Command command = factory.get(roomNumber, commandKey);
+//            command.execute();
+
+            if (isMoveAction(commandKey)) {
                 move(roomNumber);
-            } else if (isShotAction(action)) {
-                shot(roomNumber, hunterRoomNumber);
+            } else if (isShotAction(commandKey)) {
+                shot(roomNumber);
             }
 
             if (isWumpusBumped()) {
@@ -53,7 +60,7 @@ public class Game {
         showResult();
     }
 
-    private void move(int roomNumber) {
+    public void move(int roomNumber) {
         hunter.move(dungeon, roomNumber);
 
         if (isBatBumped()) {
@@ -77,7 +84,8 @@ public class Game {
         System.out.println("ЛЕТУЧИЕ МЫШИ ПЕРЕНЕСЛИ ВАС КУДА-ТО!");
     }
 
-    private void shot(int roomNumber, int hunterRoomNumber) {
+    public void shot(int roomNumber) {
+        int hunterRoomNumber = dungeon.getRoomNumber(hunter);
         hunter.shot(dungeon, roomNumber);
 
         if (!hunter.hasArrows()) {
@@ -179,7 +187,7 @@ public class Game {
     }
 
     private boolean isLose() {
-        return !hunter.isAlive() || !hunter.hasArrows();
+        return !hunter.isAlive() || !hunter.hasArrows() && wumpus.isAlive();
     }
 
     private boolean isShotAction(String action) {
